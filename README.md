@@ -2,6 +2,8 @@
 
 WezTerm terminal emülatörü için kullanıcı dostu bir grafik arayüz yapılandırıcısı. Bu araç, Streamlit kullanarak WezTerm'i kolayca yapılandırmanızı sağlar.
 
+Uygulamaya buradan ulaşabilirsiniz: [https://wezterm-gui.streamlit.app/](https://wezterm-gui.streamlit.app/)
+
 ## Özellikler
 
 - Görsel temalar (Renk şemaları) seçeneği
