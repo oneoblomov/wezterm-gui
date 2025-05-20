@@ -26,6 +26,7 @@ Uygulamaya buradan ulaşabilirsiniz: [https://wezterm-gui.streamlit.app/](https:
    ```
 
 2. Uygulamayı çalıştırın:
+
    ```bash
    streamlit run app.py
    ```
