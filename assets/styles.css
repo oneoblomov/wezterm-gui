@@ -1,0 +1,75 @@
+body {
+    background-color: #f0f0f0;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #333333;
+}
+
+.sidebar .sidebar-content {
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+}
+
+/* Sidebar başlık stillerini iyileştirme */
+.sidebar h2 {
+    padding-top: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 5px;
+}
+
+/* Butonların stilini iyileştirme */
+.stButton > button {
+    background-color: #5f87ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.stButton > button:hover {
+    background-color: #4a76e1;
+}
+
+/* İndirme butonlarını özelleştirme */
+.stDownloadButton > button {
+    background-color: #27ae60;
+}
+
+.stDownloadButton > button:hover {
+    background-color: #219653;
+}
+
+/* Form elemanlarının stilini iyileştirme */
+.stTextInput, .stSelectbox, .stSlider {
+    margin-bottom: 15px;
+}
+
+/* Bilgi kutularını güzelleştirme */
+.stInfo {
+    border-left: 4px solid #5f87ff;
+    background-color: #f0f7ff;
+}
+
+.stError {
+    border-left: 4px solid #e74c3c;
+    background-color: #ffeaea;
+}
+
+.stSuccess {
+    border-left: 4px solid #27ae60;
+    background-color: #eafaf1;
+}
+
+.stMarkdown {
+    color: #333333;
+}
+
+/* Kod bloğu stilini iyileştirme */
+.stCodeBlock {
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
