@@ -137,9 +137,36 @@ class TerminalPreviewGenerator:
                 "pwd": () => {{ return "/home/user/projects"; }},
                 "date": () => {{ return new Date().toString(); }},
                 "echo": (args) => {{ return args.join(" "); }},
-                "help": () => {{ return "Kullanılabilir Komutlar: clear, ls, pwd, date, echo, help, wezterm, config"; }},
+                "help": () => {{ return "Kullanılabilir Komutlar: clear, ls, pwd, date, echo, help, wezterm, config, whoami, uname, screenfetch"; }},
                 "wezterm": () => {{ return "WezTerm 20XX.XX.X (abcdef12) - https://wezfurlong.org/wezterm/"; }},
-                "config": () => {{ return JSON.stringify(termConfig, null, 2); }}
+                "config": () => {{ return JSON.stringify(termConfig, null, 2); }},
+                "whoami": () => {{ return "user"; }},
+                "uname": () => {{ return "Linux wezterm-sim 6.2.0-32-generic x86_64 GNU/Linux"; }},
+                "screenfetch": () => {{
+                    return `
+<span style="color:#5fafff;">
+             .-/+oossssoo+/-.                   OS: Linux
+         \`:+ssssssssssssssssss+:\`             WezTerm 20XX.XX.X
+       -+ssssssssssssssssssyyssss+-             
+     .ossssssssssssssssssdMMMNysssso.       
+    /ssssssssssshdmmNNmmyNMMMMhssssss/      
+   +ssssssssshmydMMMMMMMNddddyssssssss+     
+  /sssssssshNMMMyhhyyyyhmNMMMNhssssssss/    
+ .ssssssssdMMMNhsssssssssshNMMMdssssssss.   
+ +sssshhhyNMMNyssssssssssssyNMMMysssssss+   
+ ossyNMMMNyMMhsssssssssssssshmmmhssssssso   
+ ossyNMMMNyMMhsssssssssssssshmmmhssssssso   
+ +sssshhhyNMMNyssssssssssssyNMMMysssssss+   
+ .ssssssssdMMMNhsssssssssshNMMMdssssssss.   
+  /sssssssshNMMMyhhyyyyhmNMMMNhssssssss/    
+   +ssssssssshmydMMMMMMMNddddyssssssss+     
+    /ssssssssssshdmmNNmmyNMMMMhssssss/      
+     .ossssssssssssssssssdMMMNysssso.       
+       -+ssssssssssssssssssyyssss+-         
+         \`:+ssssssssssssssssss+:\`           
+             .-/+oossssoo+/-.               
+</span>`;
+                }},
             }};
             
             document.addEventListener("DOMContentLoaded", function() {{
@@ -151,7 +178,6 @@ class TerminalPreviewGenerator:
                 let commandHistory = [];
                 let commandHistoryIndex = -1;
                 
-                // Update terminal styling
                 function updateTerminalStyling() {{
                     terminal.style.fontFamily = termConfig.font + ", monospace";
                     terminal.style.fontSize = termConfig.fontSize + "px";
@@ -161,7 +187,6 @@ class TerminalPreviewGenerator:
                     terminal.style.padding = termConfig.padding + "px";
                     terminal.style.opacity = termConfig.opacity;
                     
-                    // Update cursors
                     const cursors = document.querySelectorAll(".cursor");
                     cursors.forEach(cursor => {{
                         cursor.style.backgroundColor = termConfig.promptColor;
@@ -174,7 +199,6 @@ class TerminalPreviewGenerator:
                         }}
                     }});
                     
-                    // Update prompts
                     const prompts = document.querySelectorAll(".prompt");
                     prompts.forEach(prompt => {{
                         const spans = prompt.querySelectorAll("span");
@@ -185,7 +209,6 @@ class TerminalPreviewGenerator:
                         }}
                     }});
                     
-                    // Update visibility of UI elements
                     if (tabBar) {{
                         tabBar.style.display = termConfig.enableTabBar ? "flex" : "none";
                     }}
@@ -198,7 +221,6 @@ class TerminalPreviewGenerator:
                     document.querySelector(".terminal-content-area").style.height = contentHeight + "px";
                 }}
 
-                // Create a new prompt line
                 function createPrompt() {{
                     const wrapper = document.createElement("div");
                     wrapper.className = "terminal-line";
@@ -216,7 +238,6 @@ class TerminalPreviewGenerator:
                     cursorElement.style = termConfig.cursorStyle;
                     cursorElement.innerHTML = "&nbsp;";
                     
-                    // Set up event handlers
                     inputSpan.addEventListener("focus", () => cursorElement.style.visibility = "visible");
                     inputSpan.addEventListener("blur", () => cursorElement.style.visibility = "hidden");
                     inputSpan.addEventListener("paste", handlePaste);
@@ -229,14 +250,12 @@ class TerminalPreviewGenerator:
                     return wrapper;
                 }}
                 
-                // Handle paste events
                 function handlePaste(e) {{
                     e.preventDefault();
                     const text = (e.clipboardData || window.clipboardData).getData("text");
                     document.execCommand("insertText", false, text);
                 }}
                 
-                // Handle keyboard events
                 function handleKeyDown(e) {{
                     if (e.key === "Enter") {{
                         e.preventDefault();
@@ -250,7 +269,6 @@ class TerminalPreviewGenerator:
                     }}
                 }}
                 
-                // Navigate command history
                 function navigateHistory(direction, inputElement) {{
                     const newIndex = commandHistoryIndex + direction;
                     
@@ -270,16 +288,13 @@ class TerminalPreviewGenerator:
                     placeCaretAtEnd(inputElement);
                 }}
                 
-                // Execute a command
                 function executeCommand(inputElement) {{
                     const command = inputElement.textContent.trim();
                     
-                    // Update the command line to be static
                     const commandLine = inputElement.parentNode;
                     commandLine.innerHTML = `<span class="prompt"><span style="color:${{termConfig.promptColor}};">user@machine</span><span style="color:${{termConfig.fg}};">:</span><span style="color:#5f87ff;">~/projects</span><span style="color:${{termConfig.promptColor}};">$</span> </span>${{command}}`;
                     
                     if (command) {{
-                        // Add to history and process
                         commandHistory.push(command);
                         commandHistoryIndex = commandHistory.length;
                         
@@ -287,15 +302,17 @@ class TerminalPreviewGenerator:
                         if (output) {{
                             const outputElem = document.createElement("div");
                             outputElem.className = "command-output";
-                            outputElem.textContent = output;
+                            if (output.includes('<span')) {{
+                                outputElem.innerHTML = output;
+                            }} else {{
+                                outputElem.textContent = output;
+                            }}
                             container.appendChild(outputElem);
                         }}
                     }}
                     
-                    // Add a new prompt
                     container.appendChild(createPrompt());
                     
-                    // Focus the new input
                     const newInput = container.querySelector(".terminal-line:last-child .input-area");
                     if (newInput) {{
                         newInput.focus();
@@ -305,7 +322,6 @@ class TerminalPreviewGenerator:
                     container.scrollTop = container.scrollHeight;
                 }}
                 
-                // Process a command and return output
                 function processCommand(cmdString) {{
                     if (!cmdString) return "";
                     
@@ -315,7 +331,6 @@ class TerminalPreviewGenerator:
                     return cmd in commands ? commands[cmd](args) : `bash: ${{cmd}}: command not found`;
                 }}
                 
-                // Position cursor at end of text
                 function placeCaretAtEnd(element) {{
                     const range = document.createRange();
                     const selection = window.getSelection();
@@ -325,17 +340,14 @@ class TerminalPreviewGenerator:
                     selection.addRange(range);
                 }}
                 
-                // Receive config updates from Streamlit
                 window.updateTerminalConfig = function(configJson) {{
                     const newConfig = JSON.parse(configJson);
                     Object.assign(termConfig, newConfig);
                     updateTerminalStyling();
                 }};
                 
-                // Initialize terminal
                 container.appendChild(createPrompt());
                 
-                // Handle clicks anywhere in terminal
                 container.addEventListener("click", function() {{
                     const activeInput = container.querySelector(".terminal-line:last-child .input-area");
                     if (activeInput) {{
@@ -344,7 +356,6 @@ class TerminalPreviewGenerator:
                     }}
                 }});
                 
-                // Start cursor blink animation
                 let cursorVisible = true;
                 setInterval(() => {{
                     const cursors = container.querySelectorAll(".cursor");
@@ -354,7 +365,6 @@ class TerminalPreviewGenerator:
                     }});
                 }}, 500);
                 
-                // Initial focus
                 setTimeout(() => {{
                     const firstInput = container.querySelector(".input-area");
                     if (firstInput) {{
@@ -732,7 +742,7 @@ class WezTermConfigurator:
             st.session_state.current_config = config.copy()
             
             st.caption("💡 **İpucu:** Terminal'e tıklayarak komut girebilirsiniz. Yukarı/aşağı ok tuşları ile komut geçmişini gezebilirsiniz.")
-            st.caption("📋 **Kullanılabilir Komutlar:** `clear`, `ls`, `pwd`, `date`, `echo`, `help`, `wezterm`, `config`")
+            st.caption("📋 **Kullanılabilir Komutlar:** `clear`, `ls`, `pwd`, `date`, `echo`, `help`, `wezterm`, `config`, `whoami`,`uname`, `screenfetch`")
             
         except Exception as e:
             logger.error(f"Terminal önizleme hatası: {e}\n{traceback.format_exc()}")
