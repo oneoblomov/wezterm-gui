@@ -2,13 +2,10 @@ import streamlit as st
 import json
 import os
 import streamlit.components.v1 as components
-import platform
-from pathlib import Path
 import logging
 import traceback
 import tempfile
 
-# Log ayarları
 log_file = os.path.join(tempfile.gettempdir(), "wezterm_gui.log")
 logging.basicConfig(
     level=logging.INFO,
@@ -19,77 +16,14 @@ logger = logging.getLogger("wezterm_gui")
 
 
 class TerminalPreviewGenerator:
-    """Terminal önizlemesi oluşturan sınıf"""
+    """Terminal preview generator class"""
     
-    @staticmethod
-    def generate_terminal_html_components(colors, enable_tab_bar, use_fancy_tab_bar, 
-                                        enable_scroll_bar, cursor_style, hyperlinkRules, leader_key):
-        """Generate HTML components for terminal preview"""
-        components = {}
-        
-        # Tab bar component
-        tab_bar_bg = colors['bg'] if not use_fancy_tab_bar else 'rgba(0,0,0,0.3)'
-        active_tab_bg = colors['prompt'] if use_fancy_tab_bar else 'rgba(255,255,255,0.1)'
-        inactive_tab_color = colors['fg'] if use_fancy_tab_bar else 'rgba(255,255,255,0.6)'
-        tab_x = '<span style="font-size:10px;opacity:0.7;">✕</span>' if use_fancy_tab_bar else ''
-        
-        components['tab_bar'] = f"""<div style="background:{tab_bar_bg};color:{colors['fg']};border-bottom:1px solid rgba(255,255,255,0.2);padding:5px 0;display:flex;align-items:center;">
-            <div style="display:flex;padding:0 10px;width:100%;">
-                <div style="background:{active_tab_bg};color:{colors['fg']};border-radius:3px;padding:4px 12px;margin-right:5px;font-size:12px;display:flex;align-items:center;">
-                    <span style="margin-right:8px;">bash</span>{tab_x}
-                </div>
-                <div style="color:{inactive_tab_color};padding:4px 12px;margin-right:5px;font-size:12px;display:flex;align-items:center;">
-                    <span style="margin-right:8px;">zsh</span>{tab_x}
-                </div>
-                <div style="color:{inactive_tab_color};padding:4px 12px;font-size:12px;display:flex;align-items:center;">
-                    <span style="margin-right:8px;">python</span>{tab_x}
-                </div>
-            </div>
-            <div style="padding:0 10px;font-size:14px;cursor:pointer;">+</div>
-        </div>""" if enable_tab_bar else ""
-        
-        # Cursor style
-        cursor_styles = {
-            'Block': f"display:inline-block;background:{colors['prompt']};color:black;animation:blink 1s step-end infinite;",
-            'Bar': f"display:inline-block;border-left:2px solid {colors['prompt']};animation:blink 1s step-end infinite;",
-            'Underline': f"display:inline-block;border-bottom:2px solid {colors['prompt']};animation:blink 1s step-end infinite;"
-        }
-        components['cursor'] = cursor_styles.get(cursor_style, cursor_styles['Block'])
-        
-        # Scrollbar component
-        components['scrollbar'] = f"""<div style="width:10px;background:{colors['bg']};border-left:1px solid rgba(255,255,255,0.15);position:relative;">
-            <div style="position:absolute;top:0;right:0;width:8px;height:30px;background:rgba(255,255,255,0.3);border-radius:4px;margin:2px;"></div>
-        </div>""" if enable_scroll_bar else ""
-
-        # Hyperlinks
-        components['hyperlinks'] = ""
-        if hyperlinkRules:
-            components['hyperlinks'] = "<span style='color:#888;'># Hyperlink examples:</span><br>"
-            if 'URL Algılama' in hyperlinkRules:
-                components['hyperlinks'] += f"<span style='color:{colors['fg']};text-decoration:underline;cursor:pointer;'>https://example.com</span><br>"
-            if 'Dosya Yolları' in hyperlinkRules:
-                components['hyperlinks'] += f"<span style='color:{colors['fg']};text-decoration:underline;cursor:pointer;'>/home/user/file.txt</span><br>"
-            if 'E-posta Adresleri' in hyperlinkRules:
-                components['hyperlinks'] += f"<span style='color:{colors['fg']};text-decoration:underline;cursor:pointer;'>user@example.com</span><br>"
-            components['hyperlinks'] += "<br>"
-
-        # Leader key example
-        components['leader_key'] = ""
-        if leader_key:
-            components['leader_key'] = f"<span style='color:#888;'># Leader key ({leader_key}) example:</span><br>"
-            components['leader_key'] += f"<span style='color:{colors['fg']}'>Press {leader_key} followed by a key to activate shortcuts</span><br><br>"
-        
-        # Animation for cursor blinking
-        components['animations'] = "<style>@keyframes blink{0%{opacity:1}50%{opacity:0}100%{opacity:1}}</style>"
-        
-        return components
-
     @staticmethod
     def generate_settings_table(theme, color_scheme, font, font_size, opacity, padding, 
                               line_height, cursor_style, enable_tab_bar, use_fancy_tab_bar, 
                               enable_scroll_bar, hyperlinkRules, leader_key, colors):
         """Generate HTML for settings table in preview"""
-        ayarlar = [
+        settings = [
             ('Tema', theme),
             ('Renk Şeması', color_scheme),
             ('Yazı Tipi', font),
@@ -107,10 +41,10 @@ class TerminalPreviewGenerator:
         rows = ''.join([
             f"<tr><td style='padding:6px;border-bottom:1px solid #eee;'>{name}</td>"
             f"<td style='padding:6px;border-bottom:1px solid #eee;'><code>{value}</code></td></tr>"
-            for name, value in ayarlar
+            for name, value in settings
         ])
         
-        renkler = ''.join([
+        color_items = ''.join([
             f"<div style='display:flex;align-items:center;margin-right:10px;'>"
             f"<div style='width:15px;height:15px;background:{colors[key]};border:1px solid #ccc;margin-right:5px;'></div>"
             f"{name}: <code>{colors[key]}</code></div>"
@@ -128,7 +62,7 @@ class TerminalPreviewGenerator:
                 {rows}
                 <tr>
                     <td style="padding:6px;">Renk Değerleri</td>
-                    <td style="padding:6px;display:flex;flex-wrap:wrap;">{renkler}</td>
+                    <td style="padding:6px;display:flex;flex-wrap:wrap;">{color_items}</td>
                 </tr>
             </table>
         </div>
@@ -144,28 +78,6 @@ class TerminalPreviewGenerator:
             colors = WezTermConfigurator.get_colors_for_theme(theme, color_scheme, custom_colors)
             content_height = 350 - (30 if enable_tab_bar else 0)
             
-            # Create tab bar component
-            tab_bar_bg = colors['bg'] if not use_fancy_tab_bar else 'rgba(0,0,0,0.3)'
-            active_tab_bg = colors['prompt'] if use_fancy_tab_bar else 'rgba(255,255,255,0.1)'
-            inactive_tab_color = colors['fg'] if use_fancy_tab_bar else 'rgba(255,255,255,0.6)'
-            tab_x = '<span style="font-size:10px;opacity:0.7;">✕</span>' if use_fancy_tab_bar else ''
-            
-            tab_bar = f"""<div style="background:{tab_bar_bg};color:{colors['fg']};border-bottom:1px solid rgba(255,255,255,0.2);padding:5px 0;display:flex;align-items:center;">
-                <div style="display:flex;padding:0 10px;width:100%;">
-                    <div style="background:{active_tab_bg};color:{colors['fg']};border-radius:3px;padding:4px 12px;margin-right:5px;font-size:12px;display:flex;align-items:center;">
-                        <span style="margin-right:8px;">bash</span>{tab_x}
-                    </div>
-                    <div style="color:{inactive_tab_color};padding:4px 12px;margin-right:5px;font-size:12px;display:flex;align-items:center;">
-                        <span style="margin-right:8px;">zsh</span>{tab_x}
-                    </div>
-                    <div style="color:{inactive_tab_color};padding:4px 12px;font-size:12px;display:flex;align-items:center;">
-                        <span style="margin-right:8px;">python</span>{tab_x}
-                    </div>
-                </div>
-                <div style="padding:0 10px;font-size:14px;cursor:pointer;">+</div>
-            </div>""" if enable_tab_bar else ""
-            
-            # Cursor style
             cursor_styles = {
                 'Block': f"background:{colors['prompt']};color:black;",
                 'Bar': f"border-left:2px solid {colors['prompt']};",
@@ -173,53 +85,120 @@ class TerminalPreviewGenerator:
             }
             cursor_style_css = cursor_styles.get(cursor_style, cursor_styles['Block'])
             
-            # Scrollbar component
-            scrollbar = f"""<div style="width:10px;background:{colors['bg']};border-left:1px solid rgba(255,255,255,0.15);position:relative;">
-                <div style="position:absolute;top:0;right:0;width:8px;height:30px;background:rgba(255,255,255,0.3);border-radius:4px;margin:2px;"></div>
-            </div>""" if enable_scroll_bar else ""
+            tab_bar = ""
+            if enable_tab_bar:
+                tab_bar_bg = colors['bg'] if not use_fancy_tab_bar else 'rgba(0,0,0,0.3)'
+                active_tab_bg = colors['prompt'] if use_fancy_tab_bar else 'rgba(255,255,255,0.1)'
+                inactive_tab_color = colors['fg'] if use_fancy_tab_bar else 'rgba(255,255,255,0.6)'
+                tab_x = '<span style="font-size:10px;opacity:0.7;">✕</span>' if use_fancy_tab_bar else ''
+                
+                tab_bar = f"""<div style="background:{tab_bar_bg};color:{colors['fg']};border-bottom:1px solid rgba(255,255,255,0.2);padding:5px 0;display:flex;align-items:center;">
+                    <div style="display:flex;padding:0 10px;width:100%;">
+                        <div style="background:{active_tab_bg};color:{colors['fg']};border-radius:3px;padding:4px 12px;margin-right:5px;font-size:12px;display:flex;align-items:center;">
+                            <span style="margin-right:8px;">bash</span>{tab_x}
+                        </div>
+                        <div style="color:{inactive_tab_color};padding:4px 12px;margin-right:5px;font-size:12px;display:flex;align-items:center;">
+                            <span style="margin-right:8px;">zsh</span>{tab_x}
+                        </div>
+                        <div style="color:{inactive_tab_color};padding:4px 12px;font-size:12px;display:flex;align-items:center;">
+                            <span style="margin-right:8px;">python</span>{tab_x}
+                        </div>
+                    </div>
+                    <div style="padding:0 10px;font-size:14px;cursor:pointer;">+</div>
+                </div>"""
             
-            # JavaScript interaktif terminal kodu - input sorununu giderme 
+            scrollbar = ""
+            if enable_scroll_bar:
+                scrollbar = f"""<div style="width:10px;background:{colors['bg']};border-left:1px solid rgba(255,255,255,0.15);position:relative;">
+                    <div style="position:absolute;top:0;right:0;width:8px;height:30px;background:rgba(255,255,255,0.3);border-radius:4px;margin:2px;"></div>
+                </div>"""
+            
             js_code = f"""
             <script>
-            // Terminal konfigürasyonu
-            const termConfig = {{
+            // Terminal configuration object
+            let termConfig = {{
                 bg: "{colors['bg']}",
                 fg: "{colors['fg']}",
                 promptColor: "{colors['prompt']}",
                 cursorStyle: "{cursor_style_css}",
                 fontSize: {font_size},
-                lineHeight: {line_height}
+                lineHeight: {line_height},
+                font: "{font}",
+                padding: {padding},
+                opacity: {opacity},
+                enableTabBar: {str(enable_tab_bar).lower()},
+                enableScrollBar: {str(enable_scroll_bar).lower()}
             }};
             
-            // Terminal geçmişi
-            let history = [
-                "total 32",
-                "drwxr-xr-x  5 user group  4096 May 20 14:32 .",
-                "drwxr-xr-x 18 user group  4096 May 19 10:15 ..",
-                "drwxr-xr-x  8 user group  4096 May 20 11:21 .git",
-                "-rw-r--r--  1 user group   129 May 18 09:43 .gitignore",
-                "-rw-r--r--  1 user group  1523 May 18 09:43 README.md", 
-                "-rw-r--r--  1 user group   978 May 20 14:30 app.py",
-                "drwxr-xr-x  2 user group  4096 May 18 09:43 assets"
-            ];
-            
-            // Basit komut veritabanı
+            // Available commands
             const commands = {{
-                "clear": () => {{ history = []; return ""; }},
-                "ls": () => {{ return history.join("\\n"); }},
+                "clear": () => {{ return ""; }},
+                "ls": () => {{ return "total 32\\ndrwxr-xr-x  5 user group  4096 May 20 14:32 .\\ndrwxr-xr-x 18 user group  4096 May 19 10:15 ..\\ndrwxr-xr-x  8 user group  4096 May 20 11:21 .git\\n-rw-r--r--  1 user group   129 May 18 09:43 .gitignore\\n-rw-r--r--  1 user group  1523 May 18 09:43 README.md\\n-rw-r--r--  1 user group   978 May 20 14:30 app.py\\ndrwxr-xr-x  2 user group  4096 May 18 09:43 assets"; }},
                 "pwd": () => {{ return "/home/user/projects"; }},
                 "date": () => {{ return new Date().toString(); }},
                 "echo": (args) => {{ return args.join(" "); }},
-                "help": () => {{ return "Kullanılabilir Komutlar: clear, ls, pwd, date, echo, help, wezterm"; }},
-                "wezterm": () => {{ return "WezTerm 20XX.XX.X (abcdef12) - https://wezfurlong.org/wezterm/"; }}
+                "help": () => {{ return "Kullanılabilir Komutlar: clear, ls, pwd, date, echo, help, wezterm, config"; }},
+                "wezterm": () => {{ return "WezTerm 20XX.XX.X (abcdef12) - https://wezfurlong.org/wezterm/"; }},
+                "config": () => {{ return JSON.stringify(termConfig, null, 2); }}
             }};
             
-            // Terminal başlatma ve işleme
             document.addEventListener("DOMContentLoaded", function() {{
                 const terminal = document.getElementById("dynamic-terminal");
                 const container = document.getElementById("terminal-container");
+                const tabBar = document.getElementById("terminal-tab-bar");
+                const scrollbar = document.getElementById("terminal-scrollbar");
                 
-                // Yeni prompt oluşturma fonksiyonu
+                let commandHistory = [];
+                let commandHistoryIndex = -1;
+                
+                // Update terminal styling
+                function updateTerminalStyling() {{
+                    terminal.style.fontFamily = termConfig.font + ", monospace";
+                    terminal.style.fontSize = termConfig.fontSize + "px";
+                    terminal.style.lineHeight = termConfig.lineHeight;
+                    terminal.style.backgroundColor = termConfig.bg;
+                    terminal.style.color = termConfig.fg;
+                    terminal.style.padding = termConfig.padding + "px";
+                    terminal.style.opacity = termConfig.opacity;
+                    
+                    // Update cursors
+                    const cursors = document.querySelectorAll(".cursor");
+                    cursors.forEach(cursor => {{
+                        cursor.style.backgroundColor = termConfig.promptColor;
+                        if (termConfig.cursorStyle.includes("border-left")) {{
+                            cursor.style.backgroundColor = "transparent";
+                            cursor.style.borderLeft = "2px solid " + termConfig.promptColor;
+                        }} else if (termConfig.cursorStyle.includes("border-bottom")) {{
+                            cursor.style.backgroundColor = "transparent";
+                            cursor.style.borderBottom = "2px solid " + termConfig.promptColor;
+                        }}
+                    }});
+                    
+                    // Update prompts
+                    const prompts = document.querySelectorAll(".prompt");
+                    prompts.forEach(prompt => {{
+                        const spans = prompt.querySelectorAll("span");
+                        if (spans.length >= 3) {{
+                            spans[0].style.color = termConfig.promptColor; // user@machine
+                            spans[1].style.color = termConfig.fg; // :
+                            spans[3].style.color = termConfig.promptColor; // $
+                        }}
+                    }});
+                    
+                    // Update visibility of UI elements
+                    if (tabBar) {{
+                        tabBar.style.display = termConfig.enableTabBar ? "flex" : "none";
+                    }}
+                    
+                    if (scrollbar) {{
+                        scrollbar.style.display = termConfig.enableScrollBar ? "block" : "none";
+                    }}
+                    
+                    const contentHeight = 350 - (termConfig.enableTabBar ? 30 : 0);
+                    document.querySelector(".terminal-content-area").style.height = contentHeight + "px";
+                }}
+
+                // Create a new prompt line
                 function createPrompt() {{
                     const wrapper = document.createElement("div");
                     wrapper.className = "terminal-line";
@@ -232,54 +211,17 @@ class TerminalPreviewGenerator:
                     inputSpan.className = "input-area";
                     inputSpan.contentEditable = true;
                     
-                    // Input focus ve cursor style
-                    inputSpan.addEventListener("focus", function() {{
-                        cursorElement.style.visibility = "visible";
-                    }});
-                    
-                    inputSpan.addEventListener("blur", function() {{
-                        cursorElement.style.visibility = "hidden";
-                    }});
-                    
-                    // Clipboard paste handling
-                    inputSpan.addEventListener("paste", function(e) {{
-                        e.preventDefault();
-                        const text = (e.clipboardData || window.clipboardData).getData("text");
-                        document.execCommand("insertText", false, text);
-                    }});
-                    
-                    // Key event listeners
-                    inputSpan.addEventListener("keydown", function(e) {{
-                        if (e.key === "Enter") {{
-                            e.preventDefault();
-                            executeCommand(this);
-                        }} else if (e.key === "ArrowUp") {{
-                            e.preventDefault();
-                            if (commandHistoryIndex > 0) {{
-                                commandHistoryIndex--;
-                                this.textContent = commandHistory[commandHistoryIndex];
-                                placeCaretAtEnd(this);
-                            }}
-                        }} else if (e.key === "ArrowDown") {{
-                            e.preventDefault();
-                            if (commandHistoryIndex < commandHistory.length - 1) {{
-                                commandHistoryIndex++;
-                                this.textContent = commandHistory[commandHistoryIndex];
-                            }} else {{
-                                commandHistoryIndex = commandHistory.length;
-                                this.textContent = "";
-                            }}
-                            placeCaretAtEnd(this);
-                        }}
-                    }});
-                    
-                    // Cursor element
                     const cursorElement = document.createElement("span");
                     cursorElement.className = "cursor";
-                    cursorElement.style = "{cursor_style_css}";
+                    cursorElement.style = termConfig.cursorStyle;
                     cursorElement.innerHTML = "&nbsp;";
                     
-                    // Build prompt line
+                    // Set up event handlers
+                    inputSpan.addEventListener("focus", () => cursorElement.style.visibility = "visible");
+                    inputSpan.addEventListener("blur", () => cursorElement.style.visibility = "hidden");
+                    inputSpan.addEventListener("paste", handlePaste);
+                    inputSpan.addEventListener("keydown", handleKeyDown);
+                    
                     wrapper.appendChild(promptSpan);
                     wrapper.appendChild(inputSpan);
                     wrapper.appendChild(cursorElement);
@@ -287,57 +229,60 @@ class TerminalPreviewGenerator:
                     return wrapper;
                 }}
                 
-                // Komut tarihçesi
-                let commandHistory = [];
-                let commandHistoryIndex = -1;
-                
-                // İlk prompt'u ekle
-                container.appendChild(createPrompt());
-                
-                // Terminal konteynerine tıklandığında aktif input'a odaklan
-                container.addEventListener("click", function() {{
-                    const activeInput = container.querySelector(".terminal-line:last-child .input-area");
-                    if (activeInput) {{
-                        activeInput.focus();
-                        placeCaretAtEnd(activeInput);
-                    }}
-                }});
-                
-                // İmleç animasyonu
-                let cursorVisible = true;
-                setInterval(() => {{
-                    const cursors = container.querySelectorAll(".cursor");
-                    cursorVisible = !cursorVisible;
-                    
-                    for (const cursor of cursors) {{
-                        cursor.style.visibility = cursorVisible ? "visible" : "hidden";
-                    }}
-                }}, 500);
-                
-                // İmleci metnin sonuna konumla
-                function placeCaretAtEnd(element) {{
-                    const range = document.createRange();
-                    const selection = window.getSelection();
-                    range.selectNodeContents(element);
-                    range.collapse(false);
-                    selection.removeAllRanges();
-                    selection.addRange(range);
+                // Handle paste events
+                function handlePaste(e) {{
+                    e.preventDefault();
+                    const text = (e.clipboardData || window.clipboardData).getData("text");
+                    document.execCommand("insertText", false, text);
                 }}
                 
-                // Komutu çalıştır
+                // Handle keyboard events
+                function handleKeyDown(e) {{
+                    if (e.key === "Enter") {{
+                        e.preventDefault();
+                        executeCommand(this);
+                    }} else if (e.key === "ArrowUp") {{
+                        e.preventDefault();
+                        navigateHistory(-1, this);
+                    }} else if (e.key === "ArrowDown") {{
+                        e.preventDefault();
+                        navigateHistory(1, this);
+                    }}
+                }}
+                
+                // Navigate command history
+                function navigateHistory(direction, inputElement) {{
+                    const newIndex = commandHistoryIndex + direction;
+                    
+                    if (direction < 0 && newIndex >= 0) {{ // Up
+                        commandHistoryIndex = newIndex;
+                        inputElement.textContent = commandHistory[commandHistoryIndex];
+                    }} else if (direction > 0) {{ // Down
+                        if (newIndex < commandHistory.length) {{
+                            commandHistoryIndex = newIndex;
+                            inputElement.textContent = commandHistory[commandHistoryIndex];
+                        }} else {{
+                            commandHistoryIndex = commandHistory.length;
+                            inputElement.textContent = "";
+                        }}
+                    }}
+                    
+                    placeCaretAtEnd(inputElement);
+                }}
+                
+                // Execute a command
                 function executeCommand(inputElement) {{
                     const command = inputElement.textContent.trim();
                     
-                    // Komut satırını etiketle
+                    // Update the command line to be static
                     const commandLine = inputElement.parentNode;
                     commandLine.innerHTML = `<span class="prompt"><span style="color:${{termConfig.promptColor}};">user@machine</span><span style="color:${{termConfig.fg}};">:</span><span style="color:#5f87ff;">~/projects</span><span style="color:${{termConfig.promptColor}};">$</span> </span>${{command}}`;
                     
-                    // Komut tarihçesine ekle
                     if (command) {{
+                        // Add to history and process
                         commandHistory.push(command);
                         commandHistoryIndex = commandHistory.length;
                         
-                        // Komutu işle ve çıktıyı ekle
                         const output = processCommand(command);
                         if (output) {{
                             const outputElem = document.createElement("div");
@@ -347,37 +292,69 @@ class TerminalPreviewGenerator:
                         }}
                     }}
                     
-                    // Yeni bir prompt ekle
+                    // Add a new prompt
                     container.appendChild(createPrompt());
                     
-                    // Yeni input'a odaklan
+                    // Focus the new input
                     const newInput = container.querySelector(".terminal-line:last-child .input-area");
                     if (newInput) {{
                         newInput.focus();
                         placeCaretAtEnd(newInput);
                     }}
                     
-                    // Aşağı kaydır
                     container.scrollTop = container.scrollHeight;
                 }}
                 
-                // Komut işleme
+                // Process a command and return output
                 function processCommand(cmdString) {{
                     if (!cmdString) return "";
                     
-                    // Komutu parse et
                     let [cmd, ...args] = cmdString.split(" ");
                     cmd = cmd.toLowerCase();
                     
-                    // Komutu çalıştır
-                    if (cmd in commands) {{
-                        return commands[cmd](args);
-                    }} else {{
-                        return `bash: ${{cmd}}: command not found`;
-                    }}
+                    return cmd in commands ? commands[cmd](args) : `bash: ${{cmd}}: command not found`;
                 }}
                 
-                // İlk input'a odaklan (başlangıçta)
+                // Position cursor at end of text
+                function placeCaretAtEnd(element) {{
+                    const range = document.createRange();
+                    const selection = window.getSelection();
+                    range.selectNodeContents(element);
+                    range.collapse(false);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }}
+                
+                // Receive config updates from Streamlit
+                window.updateTerminalConfig = function(configJson) {{
+                    const newConfig = JSON.parse(configJson);
+                    Object.assign(termConfig, newConfig);
+                    updateTerminalStyling();
+                }};
+                
+                // Initialize terminal
+                container.appendChild(createPrompt());
+                
+                // Handle clicks anywhere in terminal
+                container.addEventListener("click", function() {{
+                    const activeInput = container.querySelector(".terminal-line:last-child .input-area");
+                    if (activeInput) {{
+                        activeInput.focus();
+                        placeCaretAtEnd(activeInput);
+                    }}
+                }});
+                
+                // Start cursor blink animation
+                let cursorVisible = true;
+                setInterval(() => {{
+                    const cursors = container.querySelectorAll(".cursor");
+                    cursorVisible = !cursorVisible;
+                    cursors.forEach(cursor => {{
+                        cursor.style.visibility = cursorVisible ? "visible" : "hidden";
+                    }});
+                }}, 500);
+                
+                // Initial focus
                 setTimeout(() => {{
                     const firstInput = container.querySelector(".input-area");
                     if (firstInput) {{
@@ -385,63 +362,24 @@ class TerminalPreviewGenerator:
                         placeCaretAtEnd(firstInput);
                     }}
                 }}, 100);
+                
+                updateTerminalStyling();
             }});
             </script>
             """
             
-            # Dinamik terminal HTML - CSS ve yapı güncellemesi
             terminal_html = f"""
             <style>
-            @keyframes blink {{
-              0% {{ opacity: 1; }}
-              50% {{ opacity: 0; }}
-              100% {{ opacity: 1; }}
-            }}
-            #terminal-container {{
-                height: 100%;
-                overflow: auto;
-                font-family: '{font}', monospace;
-                font-size: {font_size}px;
-                line-height: {line_height};
-            }}
-            .terminal-line {{
-                white-space: pre;
-                padding: 0;
-                margin: 0;
-                display: flex;
-                align-items: baseline;
-            }}
-            .terminal-line:last-child {{
-                display: flex;
-            }}
-            .command-output {{
-                white-space: pre;
-                padding: 0;
-                margin: 0;
-            }}
-            .cursor {{
-                {cursor_style_css}
-                display: inline-block;
-                width: 8px;
-                height: 16px;
-                vertical-align: middle;
-            }}
-            .input-area {{
-                background: transparent;
-                border: none;
-                outline: none;
-                color: inherit;
-                font-family: inherit;
-                font-size: inherit;
-                padding: 0;
-                margin: 0;
-                caret-color: transparent;
-                min-width: 1px;
-            }}
+            @keyframes blink {{ 0% {{ opacity: 1; }} 50% {{ opacity: 0; }} 100% {{ opacity: 1; }} }}
+            #terminal-container {{ height: 100%; overflow: auto; font-family: '{font}', monospace; font-size: {font_size}px; line-height: {line_height}; }}
+            .terminal-line {{ white-space: pre; padding: 0; margin: 0; display: flex; align-items: baseline; }}
+            .command-output {{ white-space: pre; padding: 0; margin: 0; }}
+            .cursor {{ {cursor_style_css} display: inline-block; width: 8px; height: 16px; vertical-align: middle; }}
+            .input-area {{ background: transparent; border: none; outline: none; color: inherit; font-family: inherit; font-size: inherit; padding: 0; margin: 0; caret-color: transparent; min-width: 1px; }}
             </style>
             
             <div style="background:#2c2c2c;border-radius:6px;box-shadow:0 5px 15px rgba(0,0,0,0.4);overflow:hidden;width:100%;position:relative;margin-bottom:20px;">
-                <!-- Window decorations - title bar -->
+                <!-- Window title bar -->
                 <div style="display:flex;background:#21252b;padding:8px 15px;align-items:center;user-select:none;">
                     <div style="display:flex;gap:6px;">
                         <div style="height:12px;width:12px;background:#ff5f56;border-radius:50%;"></div>
@@ -452,86 +390,74 @@ class TerminalPreviewGenerator:
                 </div>
                 
                 <!-- Tab bar -->
-                {tab_bar}
+                <div id="terminal-tab-bar" style="display:{'' if enable_tab_bar else 'none'}">{tab_bar}</div>
                 
-                <!-- Terminal content area with scrollbar -->
-                <div style="display:flex;height:{content_height}px;">
+                <!-- Terminal content area -->
+                <div class="terminal-content-area" style="display:flex;height:{content_height}px;">
                     <div id="dynamic-terminal" style="flex-grow:1;background:{colors['bg']};color:{colors['fg']};padding:{padding}px;opacity:{opacity};">
-                        <div id="terminal-container">
-                            <!-- Terminal content will be added here by JavaScript -->
-                        </div>
+                        <div id="terminal-container"></div>
                     </div>
-                    {scrollbar}
+                    <div id="terminal-scrollbar" style="display:{'' if enable_scroll_bar else 'none'}">{scrollbar}</div>
                 </div>
             </div>
             {js_code}
             """
             
-            # Ayarlar tablosunu ekle
-            terminal_html += TerminalPreviewGenerator.generate_settings_table(
-                theme, color_scheme, font, font_size, opacity, padding, line_height, 
-                cursor_style, enable_tab_bar, use_fancy_tab_bar, enable_scroll_bar, 
-                hyperlinkRules, leader_key, colors
-            )
-            
             return terminal_html
         except Exception as e:
-            logger.error(f"Dinamik terminal önizlemesi oluşturulurken hata: {e}\n{traceback.format_exc()}")
-            return f"<div style='color:red;padding:20px;background:#fff0f0;border-radius:5px;'>Dinamik terminal önizlemesi oluşturulamadı: {str(e)}</div>"
+            logger.error(f"Terminal önizlemesi oluşturulurken hata: {e}\n{traceback.format_exc()}")
+            return f"<div style='color:red;padding:20px;background:#fff0f0;border-radius:5px;'>Terminal önizlemesi oluşturulamadı: {str(e)}</div>"
 
 
 class ConfigGenerator:
     """WezTerm yapılandırma dosyası üreten sınıf"""
 
     @staticmethod
-    def generate_wezterm_lua(theme, font, font_size, color_scheme, custom_colors=None, opacity=0.95,
-                          enable_tab_bar=True, enable_scroll_bar=False, cursor_style='Block',
-                          padding=8, line_height=1.0, use_fancy_tab_bar=True, hyperlinkRules=None,
-                          leader_key=None):
+    def generate_wezterm_lua(config):
         """Generate WezTerm Lua configuration based on user selections"""
         try:
             cursor_style_map = {'Block': 'SteadyBlock', 'Bar': 'SteadyBar', 'Underline': 'SteadyUnderline'}
-            wezterm_cursor_style = cursor_style_map.get(cursor_style, 'SteadyBlock')
+            wezterm_cursor_style = cursor_style_map.get(config['cursor_style'], 'SteadyBlock')
             
             lua_config = [
                 "local wezterm = require 'wezterm'",
                 "local act = wezterm.action",
                 "",
                 "return {",
-                f"  font = wezterm.font('{font}'),",
-                f"  font_size = {font_size},",
-                f"  line_height = {line_height},",
+                f"  font = wezterm.font('{config['font']}'),",
+                f"  font_size = {config['font_size']},",
+                f"  line_height = {config['line_height']},",
                 "",
-                f"  enable_tab_bar = {str(enable_tab_bar).lower()},",
-                f"  use_fancy_tab_bar = {str(use_fancy_tab_bar).lower()},",
-                f"  enable_scroll_bar = {str(enable_scroll_bar).lower()},",
-                f"  window_background_opacity = {opacity},",
+                f"  enable_tab_bar = {str(config['enable_tab_bar']).lower()},",
+                f"  use_fancy_tab_bar = {str(config['use_fancy_tab_bar']).lower()},",
+                f"  enable_scroll_bar = {str(config['enable_scroll_bar']).lower()},",
+                f"  window_background_opacity = {config['opacity']},",
                 f"  cursor_style = '{wezterm_cursor_style}',",
                 "  window_padding = {",
-                f"    left = {padding}, right = {padding},",
-                f"    top = {padding}, bottom = {padding},",
+                f"    left = {config['padding']}, right = {config['padding']},",
+                f"    top = {config['padding']}, bottom = {config['padding']},",
                 "  },"
             ]
 
-            # Add hyperlink rules if selected
-            if hyperlinkRules and len(hyperlinkRules) > 0:
+            if config['hyperlinkRules'] and len(config['hyperlinkRules']) > 0:
                 lua_config.append("  -- Hyperlink settings")
-                if 'URL Algılama' in hyperlinkRules:
-                    lua_config.append("  hyperlink_rules = {")
+                lua_config.append("  hyperlink_rules = {")
+                
+                if 'URL Algılama' in config['hyperlinkRules']:
                     lua_config.append("    -- URL detection")
                     lua_config.append("    {")
                     lua_config.append("      regex = '\\\\b\\\\w+://[\\\\w.-]+\\\\.[\\\\w.-]+\\\\S*\\\\b',")
                     lua_config.append("      format = '$0',")
                     lua_config.append("    },")
                 
-                if 'E-posta Adresleri' in hyperlinkRules:
+                if 'E-posta Adresleri' in config['hyperlinkRules']:
                     lua_config.append("    -- Email addresses")
                     lua_config.append("    {")
                     lua_config.append("      regex = '\\\\b\\\\w+@[\\\\w.-]+\\\\.[\\\\w]+\\\\b',")
                     lua_config.append("      format = 'mailto:$0',")
                     lua_config.append("    },")
                     
-                if 'Dosya Yolları' in hyperlinkRules:
+                if 'Dosya Yolları' in config['hyperlinkRules']:
                     lua_config.append("    -- File paths")
                     lua_config.append("    {")
                     lua_config.append("      regex = '\\\\b(\\\\w+:)?[\\\\/\\\\\\\\][\\\\w.~-]+[\\\\/\\\\\\\\][\\\\w.~-]+\\\\b',")
@@ -540,34 +466,32 @@ class ConfigGenerator:
                     
                 lua_config.append("  },")
 
-            # Add leader key if provided
-            if leader_key and leader_key.strip():
-                parts = [part.strip() for part in leader_key.split('+')]
+            if config['leader_key'] and config['leader_key'].strip():
+                parts = [part.strip() for part in config['leader_key'].split('+')]
                 if len(parts) >= 2:
                     key, mods = parts[-1].lower(), '+'.join(part.upper() for part in parts[:-1])
                 else:
-                    key, mods = leader_key.strip().lower(), 'CTRL'
+                    key, mods = config['leader_key'].strip().lower(), 'CTRL'
 
                 lua_config.extend([
                     "  -- Leader key configuration",
                     f"  leader = {{ key = '{key}', mods = '{mods}', timeout_milliseconds = 1000 }},"
                 ])
 
-            # Add color configuration
-            if theme == 'Custom' and custom_colors:
+            if config['theme'] == 'Custom' and config['custom_colors']:
                 lua_config.extend([
                     "  -- Custom colors",
                     "  colors = {",
-                    f"    background = '{custom_colors['bg']}',",
-                    f"    foreground = '{custom_colors['fg']}',",
-                    f"    cursor_bg = '{custom_colors['prompt']}',",
+                    f"    background = '{config['custom_colors']['bg']}',",
+                    f"    foreground = '{config['custom_colors']['fg']}',",
+                    f"    cursor_bg = '{config['custom_colors']['prompt']}',",
                     "    cursor_fg = 'black',",
                     "  },",
                 ])
             else:
                 lua_config.extend([
                     "  -- Theme color scheme",
-                    f"  color_scheme = '{color_scheme}',"
+                    f"  color_scheme = '{config['color_scheme']}',",
                 ])
             
             lua_config.append("}")
@@ -599,22 +523,30 @@ class WezTermConfigurator:
     
     def __init__(self):
         """Initialize the WezTerm configurator"""
-        self.initialize_app()
+        st.set_page_config(layout="wide", page_title="WezTerm Configurator", page_icon="🖥️")
         self.initialize_session_state()
         self.load_css()
-
-    def initialize_app(self):
-        """Initialize the Streamlit app"""
-        st.set_page_config(
-            layout="wide",
-            page_title="WezTerm Configurator",
-            page_icon="🖥️",
-            menu_items={
-                'Get Help': 'https://github.com/yourusername/wezterm-gui',
-                'Report a bug': 'https://github.com/yourusername/wezterm-gui/issues',
-                'About': "# WezTerm Yapılandırıcı\nWezTerm terminal emülatörü için görsel yapılandırma aracı."
+        
+        if 'terminal_key' not in st.session_state:
+            st.session_state.terminal_key = 0
+            
+        if 'current_config' not in st.session_state:
+            st.session_state.current_config = {
+                'theme': 'Dark',
+                'font': 'JetBrains Mono',
+                'font_size': 14,
+                'color_scheme': 'Builtin Dark',
+                'custom_colors': None,
+                'opacity': 0.95,
+                'enable_tab_bar': True,
+                'enable_scroll_bar': False,
+                'cursor_style': 'Block',
+                'padding': 8,
+                'line_height': 1.0,
+                'use_fancy_tab_bar': True,
+                'hyperlinkRules': ['URL Algılama'],
+                'leader_key': 'CTRL + a'
             }
-        )
 
     def initialize_session_state(self):
         """Initialize session state variables"""
@@ -636,8 +568,8 @@ class WezTermConfigurator:
             with open(css_path) as f:
                 st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
         except Exception as e:
-            logger.error(f"CSS dosyası yüklenirken hata: {e}\n{traceback.format_exc()}")
-            st.warning("Arayüz stil ayarları yüklenemedi, varsayılan Streamlit stili kullanılıyor.")
+            logger.error(f"CSS yüklenirken hata: {e}")
+            st.warning("Arayüz stilleri yüklenemedi.")
 
     @staticmethod
     def get_colors_for_theme(theme, color_scheme, custom_colors=None):
@@ -646,29 +578,12 @@ class WezTermConfigurator:
             return custom_colors
         return WezTermConfigurator.color_mappings.get(color_scheme, WezTermConfigurator.color_mappings['Builtin Dark'])
 
-    def import_color_scheme(self, file_content):
-        """Import color scheme from JSON"""
-        try:
-            imported_colors = json.loads(file_content)
-            
-            if not all(key in imported_colors for key in ['bg', 'fg', 'prompt']):
-                raise ValueError("Geçersiz renk şeması formatı. 'bg', 'fg' ve 'prompt' anahtarları olmalı.")
-            
-            st.session_state['theme'] = 'Custom'
-            st.session_state['custom_colors'] = imported_colors
-            st.session_state['opacity'] = 0.95
-            
-            return True
-        except Exception as e:
-            logger.error(f"Renk şeması içe aktarılırken hata: {e}\n{traceback.format_exc()}")
-            st.error(f"Renk şeması içe aktarılamadı: {e}")
-            return False
-
     def render_sidebar(self):
-        """Render the sidebar with all controls"""
+        """Render sidebar with configuration controls"""
         st.sidebar.markdown("## Tema Ayarları")
+        
         theme = st.sidebar.selectbox('Tema', ['Dark', 'Light', 'Custom'],
-                                    index=['Dark', 'Light', 'Custom'].index(st.session_state['theme']))
+                                   index=['Dark', 'Light', 'Custom'].index(st.session_state['theme']))
         if theme != st.session_state['theme']:
             st.session_state['theme'] = theme
             if theme != 'Custom':
@@ -680,13 +595,12 @@ class WezTermConfigurator:
         if theme != 'Custom':
             color_scheme_options = list(self.color_mappings.keys())
             color_scheme = st.sidebar.selectbox('Renk Şeması', color_scheme_options, 
-                                            index=color_scheme_options.index(st.session_state['selected_color_scheme']))
+                                          index=color_scheme_options.index(st.session_state['selected_color_scheme']))
             if color_scheme != st.session_state['selected_color_scheme']:
                 st.session_state['selected_color_scheme'] = color_scheme
         else:
             color_scheme = 'Custom'
 
-        # Custom color settings
         custom_colors = {}
         opacity = st.sidebar.slider('Pencere Opaklığı', 0.5, 1.0, st.session_state['opacity'])
         if opacity != st.session_state['opacity']:
@@ -702,29 +616,23 @@ class WezTermConfigurator:
             if (bg, fg, prompt) != (custom_colors['bg'], custom_colors['fg'], custom_colors['prompt']):
                 st.session_state['custom_colors'] = {'bg': bg, 'fg': fg, 'prompt': prompt}
 
-        # Terminal options
         st.sidebar.markdown("## Terminal Seçenekleri")
         enable_tab_bar = st.sidebar.checkbox('Sekme Çubuğunu Etkinleştir', value=True)
         enable_scroll_bar = st.sidebar.checkbox('Kaydırma Çubuğunu Etkinleştir', value=False)
         cursor_style = st.sidebar.selectbox('İmleç Stili', ['Block', 'Bar', 'Underline'], index=0)
 
-        # Advanced options
         with st.sidebar.expander("Gelişmiş Seçenekler"):
             padding = st.sidebar.slider('Dolgu', 0, 20, 8)
             line_height = st.sidebar.slider('Satır Yüksekliği', 0.8, 2.0, 1.0, 0.1)
             use_fancy_tab_bar = st.sidebar.checkbox('Süslü Sekme Çubuğunu Kullan', value=True)
             hyperlinkRules = st.sidebar.multiselect('Bağlantı Kuralları', 
-                                        ['URL Algılama', 'Dosya Yolları', 'E-posta Adresleri'],
-                                        ['URL Algılama'])
+                                      ['URL Algılama', 'Dosya Yolları', 'E-posta Adresleri'],
+                                      ['URL Algılama'])
             leader_key = st.sidebar.text_input('Lider Tuşu', 'CTRL + a')
             
             if leader_key and '+' not in leader_key:
                 st.sidebar.warning("Lider tuşu formatı 'MOD + TUŞ' şeklinde olmalıdır, örneğin 'CTRL + a'")
-
-        # Import/Export functionality
-        self.render_import_export_sidebar()
         
-        # Return configuration
         return {
             'theme': theme,
             'font': font,
@@ -742,103 +650,126 @@ class WezTermConfigurator:
             'leader_key': leader_key
         }
 
-    def render_import_export_sidebar(self):
-        """Render import/export section in the sidebar"""
-        st.sidebar.markdown("## İçe/Dışa Aktar")
-        import_export = st.sidebar.expander("Renk Şeması İçe/Dışa Aktar")
+    def update_terminal(self, config):
+        """Update terminal via JavaScript without reload"""
+        theme_colors = self.get_colors_for_theme(config['theme'], config['color_scheme'], 
+                                               config['custom_colors'])
+        
+        cursor_styles = {
+            'Block': f"background:{theme_colors['prompt']};color:black;",
+            'Bar': f"border-left:2px solid {theme_colors['prompt']};",
+            'Underline': f"border-bottom:2px solid {theme_colors['prompt']};"
+        }
+        cursor_style_css = cursor_styles.get(config['cursor_style'], cursor_styles['Block'])
+        
+        js_update = {
+            'bg': theme_colors['bg'],
+            'fg': theme_colors['fg'],
+            'promptColor': theme_colors['prompt'],
+            'cursorStyle': cursor_style_css,
+            'fontSize': config['font_size'],
+            'lineHeight': config['line_height'],
+            'font': config['font'],
+            'padding': config['padding'],
+            'opacity': config['opacity'],
+            'enableTabBar': config['enable_tab_bar'],
+            'enableScrollBar': config['enable_scroll_bar']
+        }
+        
+        js_code = f"if (window.updateTerminalConfig) {{ window.updateTerminalConfig('{json.dumps(js_update)}'); }}"
+        components.html(f"<script>{js_code}</script>", height=0)
 
-        with import_export:
-            # Export color scheme
-            if st.button("Mevcut Renk Şemasını Dışa Aktar"):
-                try:
-                    export_data = st.session_state['custom_colors'] if st.session_state['theme'] == 'Custom' else \
-                                 self.color_mappings.get(st.session_state['selected_color_scheme'], {})
-                    
-                    export_json = json.dumps(export_data)
-                    st.code(export_json)
-                    
-                    filename = f"{st.session_state['selected_color_scheme'] if st.session_state['theme'] != 'Custom' else 'custom'}_colors.json"
-                    st.download_button("JSON İndir", export_json, file_name=filename, mime="application/json")
-                except Exception as e:
-                    logger.error(f"Renk şeması dışa aktarılırken hata: {e}\n{traceback.format_exc()}")
-                    st.error(f"Renk şeması dışa aktarılamadı: {e}")
-            
-            # Import color scheme
-            st.markdown("### Renk Şeması İçe Aktar")
-            upload_file = st.file_uploader("JSON dosyası yükle", type=['json'])
-            if upload_file is not None:
-                if self.import_color_scheme(upload_file.getvalue().decode()):
-                    st.success("Renk şeması başarıyla içe aktarıldı! Lütfen sayfayı yenileyin.")
-
-    def render_config_section(self, config):
-        """Render the configuration code section"""
-        st.subheader("Yapılandırma Kodu")
+    def config_has_changed(self, new_config):
+        """Check if config has changed significantly from current state"""
+        current = st.session_state.current_config
         
-        theme_config = config['theme'] == 'Custom'
-        colors = config['custom_colors'] if theme_config else None
-        
-        lua_code = ConfigGenerator.generate_wezterm_lua(
-            config['theme'], config['font'], config['font_size'], 
-            config['color_scheme'], colors, config['opacity'],
-            config['enable_tab_bar'], config['enable_scroll_bar'], config['cursor_style'],
-            config['padding'], config['line_height'], config['use_fancy_tab_bar'], 
-            config['hyperlinkRules'], config['leader_key']
-        )
-        
-        if lua_code:
-            st.code(lua_code, language='lua')
-            st.download_button("wezterm.lua İndir", lua_code, file_name="wezterm.lua")
-            st.info("""
-            **Bu yapılandırmayı kullanmak için:**
-            1. Yukarıdaki "wezterm.lua İndir" düğmesini kullanarak dosyayı indirin
-            2. `~/.config/wezterm/wezterm.lua` (Linux/macOS) veya `%USERPROFILE%\\.wezterm.lua` (Windows) konumuna kaydedin
-            3. Değişikliklerinizi görmek için WezTerm'i yeniden başlatın
-            """)
-        else:
-            st.error("Yapılandırma kodu oluşturulamadı. Lütfen ayarlarınızı kontrol edin.")
-
-    def render_preview_section(self, config):
-        """Render the terminal preview section"""
-        st.subheader("Terminal Önizleme")
-        
-        # Remove the static/dynamic radio option - always use dynamic preview
-        try:
-            colors = st.session_state['custom_colors'] if config['theme'] == 'Custom' else None
-            
-            # Generate interactive terminal preview
-            terminal_preview = TerminalPreviewGenerator.generate_dynamic_terminal_preview(
-                config['theme'], config['font'], config['font_size'], config['color_scheme'], 
-                colors, config['opacity'],
-                config['enable_tab_bar'], config['enable_scroll_bar'], config['cursor_style'],
-                config['padding'], config['line_height'], config['use_fancy_tab_bar'], 
-                config['hyperlinkRules'], config['leader_key']
-            )
-            
-            if terminal_preview:
-                components.html(terminal_preview, height=670, scrolling=False)
-                st.caption("💡 **İpucu:** Terminal'e tıklayarak komut girebilirsiniz. Yukarı/aşağı ok tuşları ile komut geçmişini gezebilirsiniz.")
-                st.caption("📋 **Kullanılabilir Komutlar:** `clear`, `ls`, `pwd`, `date`, `echo`, `help`, `wezterm`")
-            else:
-                st.error("Terminal önizlemesi oluşturulamadı.")
+        if isinstance(new_config.get('custom_colors'), dict) and isinstance(current.get('custom_colors'), dict):
+            if str(new_config['custom_colors']) != str(current['custom_colors']):
+                return True
                 
-        except Exception as e:
-            logger.error(f"Terminal önizleme gösterilirken hata: {e}\n{traceback.format_exc()}")
-            st.error(f"Terminal önizleme gösterilirken hata: {e}")
-            st.warning("Sorunu çözmek için sayfayı yenilemeyi deneyin.")
+        if isinstance(new_config.get('hyperlinkRules'), list) and isinstance(current.get('hyperlinkRules'), list):
+            if set(new_config['hyperlinkRules'] or []) != set(current['hyperlinkRules'] or []):
+                return True
+        
+        for key, value in new_config.items():
+            if key not in ('custom_colors', 'hyperlinkRules') and value != current.get(key):
+                return True
+                
+        return False
 
     def run(self):
         """Run the WezTerm Configurator app"""
         st.title('WezTerm Yapılandırıcı')
         st.write('Sol menüden seçimlerinizi yapın ve terminal önizlemesini görün!')
         
+        terminal_placeholder = st.empty()
+        
         config = self.render_sidebar()
-        col1, col2 = st.columns(2)
         
-        with col1:
-            self.render_config_section(config)
+        config_changed = self.config_has_changed(config)
         
-        with col2:
-            self.render_preview_section(config)
+        st.subheader("Terminal Önizleme")
+        
+        try:
+            if config_changed or 'terminal_html' not in st.session_state:
+                colors = st.session_state['custom_colors'] if config['theme'] == 'Custom' else None
+                terminal_html = TerminalPreviewGenerator.generate_dynamic_terminal_preview(
+                    config['theme'], config['font'], config['font_size'], config['color_scheme'], 
+                    colors, config['opacity'], config['enable_tab_bar'], config['enable_scroll_bar'], 
+                    config['cursor_style'], config['padding'], config['line_height'], 
+                    config['use_fancy_tab_bar'], config['hyperlinkRules'], config['leader_key']
+                )
+                
+                st.session_state.terminal_html = terminal_html
+                st.session_state.terminal_key += 1
+                with terminal_placeholder:
+                    components.html(terminal_html, height=450, scrolling=False)
+            else:
+                self.update_terminal(config)
+                with terminal_placeholder:
+                    components.html(st.session_state.terminal_html, height=450, scrolling=False)
+            
+            st.session_state.current_config = config.copy()
+            
+            st.caption("💡 **İpucu:** Terminal'e tıklayarak komut girebilirsiniz. Yukarı/aşağı ok tuşları ile komut geçmişini gezebilirsiniz.")
+            st.caption("📋 **Kullanılabilir Komutlar:** `clear`, `ls`, `pwd`, `date`, `echo`, `help`, `wezterm`, `config`")
+            
+        except Exception as e:
+            logger.error(f"Terminal önizleme hatası: {e}\n{traceback.format_exc()}")
+            st.error(f"Terminal önizleme hatası: {e}")
+        
+        st.subheader("Yapılandırma Kodu ve Ayarlar")
+        code_col, settings_col = st.columns([2, 1])
+        
+        with code_col:
+            lua_code = ConfigGenerator.generate_wezterm_lua(config)
+            
+            if lua_code:
+                st.code(lua_code, language='lua')
+                st.download_button("wezterm.lua İndir", lua_code, file_name="wezterm.lua")
+                st.info("""
+                **Bu yapılandırmayı kullanmak için:**
+                1. "wezterm.lua İndir" düğmesini kullanarak dosyayı indirin
+                2. `~/.config/wezterm/wezterm.lua` (Linux/macOS) veya `%USERPROFILE%\\.wezterm.lua` (Windows) konumuna kaydedin
+                3. WezTerm'i yeniden başlatın
+                """)
+            else:
+                st.error("Yapılandırma kodu oluşturulamadı. Lütfen ayarlarınızı kontrol edin.")
+        
+        with settings_col:
+            st.markdown("### Aktif Ayarlar")
+            
+            display_colors = st.session_state['custom_colors'] if config['theme'] == 'Custom' else self.get_colors_for_theme(config['theme'], config['color_scheme'])
+            
+            settings_html = TerminalPreviewGenerator.generate_settings_table(
+                config['theme'], config['color_scheme'], config['font'], config['font_size'], 
+                config['opacity'], config['padding'], config['line_height'], 
+                config['cursor_style'], config['enable_tab_bar'], config['use_fancy_tab_bar'], 
+                config['enable_scroll_bar'], config['hyperlinkRules'], config['leader_key'], 
+                display_colors
+            )
+            
+            components.html(settings_html, height=600, scrolling=True)
 
 
 if __name__ == "__main__":

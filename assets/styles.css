@@ -12,14 +12,12 @@ h1, h2, h3, h4, h5, h6 {
     border-right: 1px solid #e0e0e0;
 }
 
-/* Sidebar başlık stillerini iyileştirme */
 .sidebar h2 {
     padding-top: 10px;
     border-bottom: 1px solid #e0e0e0;
     padding-bottom: 5px;
 }
 
-/* Butonların stilini iyileştirme */
 .stButton > button {
     background-color: #5f87ff;
     color: white;
@@ -34,7 +32,6 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #4a76e1;
 }
 
-/* İndirme butonlarını özelleştirme */
 .stDownloadButton > button {
     background-color: #27ae60;
 }
@@ -43,12 +40,10 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #219653;
 }
 
-/* Form elemanlarının stilini iyileştirme */
 .stTextInput, .stSelectbox, .stSlider {
-    margin-bottom: 15px;
+margin-bottom: 15px;
 }
 
-/* Bilgi kutularını güzelleştirme */
 .stInfo {
     border-left: 4px solid #5f87ff;
     background-color: #f0f7ff;
@@ -68,7 +63,6 @@ h1, h2, h3, h4, h5, h6 {
     color: #333333;
 }
 
-/* Kod bloğu stilini iyileştirme */
 .stCodeBlock {
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
