@@ -1,1 +1,7 @@
-streamlit>=1.10.0
+streamlit
+json
+platform
+pathlib
+logging
+traceback
+tempfile
