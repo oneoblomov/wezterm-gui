@@ -1,4 +1,3 @@
-# Color schemes for WezTerm
 COLOR_MAPPINGS = {
     'Builtin Dark': {'bg': '#121212', 'fg': '#d0d0d0', 'prompt': '#5fafff'},
     'Builtin Light': {'bg': '#f0f0f0', 'fg': '#333333', 'prompt': '#0087af'},
@@ -10,7 +9,6 @@ COLOR_MAPPINGS = {
     'Nord': {'bg': '#2e3440', 'fg': '#d8dee9', 'prompt': '#88c0d0'}
 }
 
-# Theme to color scheme mapping
 THEME_COLOR_SCHEME_MAPPING = {
     'Dark': 'Builtin Dark',
     'Light': 'Builtin Light',

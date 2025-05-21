@@ -9,7 +9,8 @@ logger = logging.getLogger("wezterm_gui")
 def load_css():
     """Load custom CSS"""
     try:
-        css_path = os.path.join(os.path.dirname(__file__), "assets/styles.css")
+        project_root = os.path.dirname(os.path.dirname(__file__))
+        css_path = os.path.join(project_root, "assets", "styles.css")
         with open(css_path) as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     except Exception as e:
@@ -18,17 +19,14 @@ def load_css():
 
 def config_has_changed(new_config, current_config):
     """Check if config has changed significantly from current state"""
-    # Check complex structures first
     if isinstance(new_config.get('custom_colors'), dict) and isinstance(current_config.get('custom_colors'), dict):
         if str(new_config['custom_colors']) != str(current_config['custom_colors']):
             return True
             
-    # Check lists
     if isinstance(new_config.get('hyperlinkRules'), list) and isinstance(current_config.get('hyperlinkRules'), list):
         if set(new_config['hyperlinkRules'] or []) != set(current_config['hyperlinkRules'] or []):
             return True
     
-    # Check all other values
     for key, value in new_config.items():
         if key not in ('custom_colors', 'hyperlinkRules') and value != current_config.get(key):
             return True
@@ -37,18 +35,18 @@ def config_has_changed(new_config, current_config):
 
 def update_terminal_js(config, theme_colors):
     """Generate and execute JavaScript for terminal updates"""
-    cursor_styles = {
+    default_cursor_styles = {
         'Block': f"background:{theme_colors['prompt']};color:black;",
         'Bar': f"border-left:2px solid {theme_colors['prompt']};",
         'Underline': f"border-bottom:2px solid {theme_colors['prompt']};"
     }
-    cursor_style_css = cursor_styles.get(config['cursor_style'], cursor_styles['Block'])
+    default_cursor_style_css = default_cursor_styles.get(config['default_cursor_style'], default_cursor_styles['Block'])
     
     js_update = {
         'bg': theme_colors['bg'],
         'fg': theme_colors['fg'],
         'promptColor': theme_colors['prompt'],
-        'cursorStyle': cursor_style_css,
+        'cursorStyle': default_cursor_style_css,
         'fontSize': config['font_size'],
         'lineHeight': config['line_height'],
         'font': config['font'],

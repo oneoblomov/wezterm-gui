@@ -20,22 +20,22 @@ Uygulamaya buradan ulaşabilirsiniz: [https://wezterm-gui.streamlit.app/](https:
 
 1. Bu projeyi klonlayın:
 
-```bash
-git clone https://github.com/oneoblomov/wezterm-gui.git
-cd wezterm-gui
-```
+   ```bash
+   git clone https://github.com/oneoblomov/wezterm-gui.git
+   cd wezterm-gui
+   ```
 
 2. Gerekli Python paketlerini yükleyin:
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 3. Uygulamayı çalıştırın:
 
-```bash
-streamlit run app.py
-```
+   ```bash
+   streamlit run app.py
+   ```
 
 ## Kullanım
 

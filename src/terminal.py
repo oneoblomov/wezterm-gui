@@ -1,6 +1,6 @@
 import logging
 import traceback
-from themes import get_colors_for_theme
+from src.themes import get_colors_for_theme
 
 logger = logging.getLogger("wezterm_gui")
 
@@ -9,8 +9,8 @@ class TerminalPreviewGenerator:
     
     @staticmethod
     def generate_settings_table(theme, color_scheme, font, font_size, opacity, padding, 
-                              line_height, cursor_style, enable_tab_bar, use_fancy_tab_bar, 
-                              enable_scroll_bar, hyperlinkRules, leader_key, colors):
+                              line_height, default_cursor_style, enable_tab_bar, use_fancy_tab_bar, 
+                              enable_scroll_bar, hyperlinkRules, leader_key, colors, **window_props):
         """Generate HTML for settings table in preview"""
         settings = [
             ('Tema', theme),
@@ -20,12 +20,34 @@ class TerminalPreviewGenerator:
             ('Opaklık', f"{opacity:.2f}"),
             ('İç Dolgu', f"{padding}px"),
             ('Satır Yüksekliği', line_height),
-            ('İmleç Stili', cursor_style),
+            ('İmleç Stili', default_cursor_style),
             ('Sekme Çubuğu', 'Etkin' if enable_tab_bar else 'Devre Dışı'),
             ('Kaydırma Çubuğu', 'Etkin' if enable_scroll_bar else 'Devre Dışı'),
             ('Bağlantı Kuralları', ', '.join(hyperlinkRules) if hyperlinkRules else 'Yok'),
             ('Lider Tuşu', leader_key if leader_key else 'Tanımlanmamış')
         ]
+        
+        if 'window_width' in window_props:
+            settings.append(('Pencere Boyutu', f"{window_props.get('window_width', 800)}x{window_props.get('window_height', 600)}"))
+        
+        if 'window_decorations' in window_props and window_props['window_decorations']:
+            settings.append(('Pencere Dekorasyonları', ' | '.join(window_props.get('window_decorations', []))))
+        
+        if 'window_position' in window_props and window_props['window_position']:
+            settings.append(('Başlangıç Pozisyonu', f"X:{window_props['window_position'][0]}, Y:{window_props['window_position'][1]}"))
+        
+        if window_props.get('window_maximized'):
+            settings.append(('Başlangıç Durumu', 'Maksimize'))
+        elif window_props.get('window_fullscreen'):
+            settings.append(('Başlangıç Durumu', 'Tam Ekran'))
+        else:
+            settings.append(('Başlangıç Durumu', 'Normal'))
+            
+        settings.extend([
+            ('Her Zaman Üstte', 'Evet' if window_props.get('window_always_on_top') else 'Hayır'),
+            ('Kapatma Onayı', window_props.get('window_close_confirmation', 'AlwaysPrompt')),
+            ('Tek Sekme Varsa Gizle', 'Evet' if window_props.get('window_hide_tab_bar_if_only_one_tab', True) else 'Hayır')
+        ])
         
         rows = ''.join([
             f"<tr><td style='padding:6px;border-bottom:1px solid #eee;'>{name}</td>"
@@ -59,7 +81,7 @@ class TerminalPreviewGenerator:
 
     @staticmethod
     def generate_dynamic_terminal_preview(theme, font, font_size, color_scheme, custom_colors=None, opacity=0.95,
-                                   enable_tab_bar=True, enable_scroll_bar=False, cursor_style='Block',
+                                   enable_tab_bar=True, enable_scroll_bar=False, default_cursor_style='Block',
                                    padding=8, line_height=1.0, use_fancy_tab_bar=True, hyperlinkRules=None,
                                    leader_key=None):
         """Generate dynamic interactive HTML terminal preview with JavaScript"""
@@ -67,18 +89,16 @@ class TerminalPreviewGenerator:
             colors = get_colors_for_theme(theme, color_scheme, custom_colors)
             content_height = 350 - (30 if enable_tab_bar else 0)
             
-            # Define cursor styles
-            cursor_styles = {
+            default_cursor_styles = {
                 'Block': f"background:{colors['prompt']};color:black;",
                 'Bar': f"border-left:2px solid {colors['prompt']};",
                 'Underline': f"border-bottom:2px solid {colors['prompt']};"
             }
-            cursor_style_css = cursor_styles.get(cursor_style, cursor_styles['Block'])
+            default_cursor_style_css = default_cursor_styles.get(default_cursor_style, default_cursor_styles['Block'])
             
-            # Create components
             tab_bar = generate_tab_bar(enable_tab_bar, colors, use_fancy_tab_bar)
             scrollbar = generate_scrollbar(enable_scroll_bar, colors)
-            js_code = generate_terminal_js(colors, font_size, line_height, cursor_style_css, padding, opacity, enable_tab_bar, enable_scroll_bar)
+            js_code = generate_terminal_js(colors, font_size, line_height, default_cursor_style_css, padding, opacity, enable_tab_bar, enable_scroll_bar)
             
             terminal_html = f"""
             <style>
@@ -86,7 +106,7 @@ class TerminalPreviewGenerator:
             #terminal-container {{ height: 100%; overflow: auto; font-family: '{font}', monospace; font-size: {font_size}px; line-height: {line_height}; }}
             .terminal-line {{ white-space: pre; padding: 0; margin: 0; display: flex; align-items: baseline; }}
             .command-output {{ white-space: pre; padding: 0; margin: 0; }}
-            .cursor {{ {cursor_style_css} display: inline-block; width: 8px; height: 16px; vertical-align: middle; }}
+            .cursor {{ {default_cursor_style_css} display: inline-block; width: 8px; height: 16px; vertical-align: middle; }}
             .input-area {{ background: transparent; border: none; outline: none; color: inherit; font-family: inherit; font-size: inherit; padding: 0; margin: 0; caret-color: transparent; min-width: 1px; }}
             </style>
             
@@ -119,9 +139,6 @@ class TerminalPreviewGenerator:
         except Exception as e:
             logger.error(f"Terminal önizlemesi oluşturulurken hata: {e}\n{traceback.format_exc()}")
             return f"<div style='color:red;padding:20px;background:#fff0f0;border-radius:5px;'>Terminal önizlemesi oluşturulamadı: {str(e)}</div>"
-
-
-# Helper functions
 
 def generate_tab_bar(enable_tab_bar, colors, use_fancy_tab_bar):
     """Generate tab bar HTML"""
@@ -157,16 +174,15 @@ def generate_scrollbar(enable_scroll_bar, colors):
         <div style="position:absolute;top:0;right:0;width:8px;height:30px;background:rgba(255,255,255,0.3);border-radius:4px;margin:2px;"></div>
     </div>"""
 
-def generate_terminal_js(colors, font_size, line_height, cursor_style_css, padding, opacity, enable_tab_bar, enable_scroll_bar):
+def generate_terminal_js(colors, font_size, line_height, default_cursor_style_css, padding, opacity, enable_tab_bar, enable_scroll_bar):
     """Generate terminal JavaScript code"""
     return f"""
     <script>
-    // Terminal configuration object
     let termConfig = {{
         bg: "{colors['bg']}",
         fg: "{colors['fg']}",
         promptColor: "{colors['prompt']}",
-        cursorStyle: "{cursor_style_css}",
+        cursorStyle: "{default_cursor_style_css}",
         fontSize: {font_size},
         lineHeight: {line_height},
         padding: {padding},
@@ -175,7 +191,6 @@ def generate_terminal_js(colors, font_size, line_height, cursor_style_css, paddi
         enableScrollBar: {str(enable_scroll_bar).lower()}
     }};
     
-    // Available commands
     const commands = {{
         "clear": () => {{ return ""; }},
         "ls": () => {{ return "total 32\\ndrwxr-xr-x  5 user group  4096 May 20 14:32 .\\ndrwxr-xr-x 18 user group  4096 May 19 10:15 ..\\ndrwxr-xr-x  8 user group  4096 May 20 11:21 .git\\n-rw-r--r--  1 user group   129 May 18 09:43 .gitignore\\n-rw-r--r--  1 user group  1523 May 18 09:43 README.md\\n-rw-r--r--  1 user group   978 May 20 14:30 app.py\\ndrwxr-xr-x  2 user group  4096 May 18 09:43 assets"; }},
@@ -191,7 +206,7 @@ def generate_terminal_js(colors, font_size, line_height, cursor_style_css, paddi
             return `
 <span style="color:#5fafff;">
              .-/+oossssoo+/-.                   OS: Linux
-         \\`:+ssssssssssssssssss+:\\`           WezTerm 20XX.XX.X
+         \\`:+ssssssssssssssssss+:\\`               WezTerm 20XX.XX.X
        -+ssssssssssssssssssyyssss+-             Kernel: 6.2.0-32-generic
      .ossssssssssssssssssdMMMNysssso.           Uptime: 1h 23m
     /ssssssssssshdmmNNmmyNMMMMhssssss/          CPU: Intel i7-10700K
