@@ -2,6 +2,10 @@
 
 WezTerm terminal emülatörü için görsel bir yapılandırma aracı. Basit ve etkileşimli bir arayüz ile WezTerm ayarlarınızı düzenleyebilir ve sonuçları gerçek zamanlı olarak görebilirsiniz.
 
+## Canlı Demo
+
+Uygulamaya buradan ulaşabilirsiniz: [https://wezterm-gui.streamlit.app/](https://wezterm-gui.streamlit.app/)
+
 ## Özellikler
 
 - Terminal önizlemesi
