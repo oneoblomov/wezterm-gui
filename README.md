@@ -1,46 +1,55 @@
 # WezTerm Yapılandırıcı
 
-WezTerm terminal emülatörü için kullanıcı dostu bir grafik arayüz yapılandırıcısı. Bu araç, Streamlit kullanarak WezTerm'i kolayca yapılandırmanızı sağlar.
-
-Uygulamaya buradan ulaşabilirsiniz: [https://wezterm-gui.streamlit.app/](https://wezterm-gui.streamlit.app/)
+WezTerm terminal emülatörü için görsel bir yapılandırma aracı. Basit ve etkileşimli bir arayüz ile WezTerm ayarlarınızı düzenleyebilir ve sonuçları gerçek zamanlı olarak görebilirsiniz.
 
 ## Özellikler
 
-- Görsel temalar (Renk şemaları) seçeneği
-- Özel renk şeması oluşturma
-- Yazı tipi ve boyut ayarları
-- Pencere opaklığı kontrolü
-- Sekme ve kaydırma çubuğu seçenekleri
-- İmleç stili ayarları
-- Bağlantı kuralları yapılandırması
-- Renk şemalarını içe/dışa aktarma
-- Doğrudan WezTerm yapılandırma konumuna kaydetme
-- Canlı önizleme
+- Terminal önizlemesi
+- Renk şemalarını özelleştirme
+- Yazı tipi, boyut ve boşluk ayarları
+- Sekme çubuğu ve kaydırma çubuğu konfigürasyonu
+- İmleç stili seçimi
+- Lider tuşu ve kısayol ayarları
+- Lua yapılandırma dosyası oluşturma
 
 ## Kurulum
 
-1. Gereksinimleri yükleyin:
+1. Bu projeyi klonlayın:
 
-   ```bash
-   pip install streamlit
-   ```
+```bash
+git clone https://github.com/oneoblomov/wezterm-gui.git
+cd wezterm-gui
+```
 
-2. Uygulamayı çalıştırın:
+2. Gerekli Python paketlerini yükleyin:
 
-   ```bash
-   streamlit run app.py
-   ```
+```bash
+pip install -r requirements.txt
+```
+
+3. Uygulamayı çalıştırın:
+
+```bash
+streamlit run app.py
+```
 
 ## Kullanım
 
-1. Sol menüden istediğiniz ayarları seçin
-2. Yapılandırmanın önizlemesini sağ tarafta görün
-3. Memnunsanız, yapılandırma dosyasını indirin veya doğrudan WezTerm yapılandırma konumuna kaydedin
-4. WezTerm'i yeniden başlatın
+1. Sol menüden istediğiniz renk şeması, yazı tipi ve diğer ayarları seçin
+2. Terminal önizlemesini gerçek zamanlı olarak görün
+3. Oluşturulan Lua yapılandırma dosyasını indirin
+4. `wezterm.lua` dosyasını WezTerm konfigürasyon dizininize yerleştirin
 
-## Geliştirme
+## WezTerm Yapılandırma Dosyası Konumu
 
-Bu projeye katkıda bulunmak için pull request gönderebilirsiniz. Yeni özellikler eklemek, hataları düzeltmek veya belgelendirmeyi iyileştirmek için katkılarınızı bekliyoruz.
+- Windows: `%USERPROFILE%\.wezterm.lua`
+- macOS/Linux: `~/.config/wezterm/wezterm.lua`
+
+## Gereksinimler
+
+- Python 3.7+
+- Streamlit
+- Modern bir web tarayıcısı
 
 ## Lisans
 
