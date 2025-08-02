@@ -1,6 +1,6 @@
 import logging
 import traceback
-from src.themes import get_colors_for_theme
+from themes import get_colors_for_theme
 
 logger = logging.getLogger("wezterm_gui")
 

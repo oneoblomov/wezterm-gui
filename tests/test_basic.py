@@ -2,13 +2,16 @@ import unittest
 import sys
 import os
 
-# Add the src directory to the path so we can import modules
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+# Add the project root and src directory to the path
+project_root = os.path.dirname(os.path.dirname(__file__))
+src_path = os.path.join(project_root, 'src')
+sys.path.insert(0, project_root)
+sys.path.insert(0, src_path)
 
-from config import ConfigGenerator
-from terminal import TerminalPreviewGenerator
-from themes import get_colors_for_theme, COLOR_MAPPINGS
-from utils import config_has_changed
+from src.config import ConfigGenerator
+from src.terminal import TerminalPreviewGenerator
+from src.themes import get_colors_for_theme, COLOR_MAPPINGS
+from src.utils import config_has_changed
 
 
 class TestBasicMath(unittest.TestCase):
