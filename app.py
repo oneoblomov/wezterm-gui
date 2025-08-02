@@ -77,7 +77,6 @@ class WezTermConfigurator:
         """Tema ayarları bölümünü render et"""
         st.sidebar.markdown("## Tema Ayarları")
         
-        # Theme selection
         theme = st.sidebar.selectbox('Tema', 
                                    ['Dark', 'Light', 'Custom'],
                                    index=['Dark', 'Light', 'Custom'].index(st.session_state['theme']))
@@ -87,14 +86,12 @@ class WezTermConfigurator:
             if theme != 'Custom':
                 st.session_state['selected_color_scheme'] = THEME_COLOR_SCHEME_MAPPING[theme]
 
-        # Font settings
         font = st.sidebar.selectbox('Yazı Tipi', 
                                   ['JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Hack', 
                                    'Source Code Pro', 'Ubuntu Mono', 'Menlo', 'Monaco'])
         
         font_size = st.sidebar.slider('Yazı Boyutu', 8, 32, 14)
 
-        # Color scheme
         if theme != 'Custom':
             color_scheme_options = list(COLOR_MAPPINGS.keys())
             color_scheme = st.sidebar.selectbox('Renk Şeması', 
@@ -106,12 +103,10 @@ class WezTermConfigurator:
         else:
             color_scheme = 'Custom'
 
-        # Opacity
         opacity = st.sidebar.slider('Pencere Opaklığı', 0.5, 1.0, st.session_state['opacity'])
         if opacity != st.session_state['opacity']:
             st.session_state['opacity'] = opacity
         
-        # Custom colors
         custom_colors = {}
         if theme == 'Custom':
             st.sidebar.markdown("## Özel Renk Ayarları")
@@ -141,7 +136,6 @@ class WezTermConfigurator:
         enable_scroll_bar = st.sidebar.checkbox('Kaydırma Çubuğunu Etkinleştir', value=False)
         default_cursor_style = st.sidebar.selectbox('İmleç Stili', ['Block', 'Bar', 'Underline'], index=0)
 
-        # Advanced options
         with st.sidebar.expander("Gelişmiş Seçenekler"):
             padding = st.sidebar.slider('Dolgu', 0, 20, 8)
             line_height = st.sidebar.slider('Satır Yüksekliği', 0.8, 2.0, 1.0, 0.1)
@@ -169,7 +163,6 @@ class WezTermConfigurator:
         """Pencere özellikleri bölümünü render et"""
         st.sidebar.markdown("## Pencere Özellikleri")
         
-        # Window dimensions
         window_width = st.sidebar.number_input('Pencere Genişliği (pixel)', 
                                          min_value=400, max_value=3840, 
                                          value=st.session_state.get('window_width', 800),
@@ -180,12 +173,10 @@ class WezTermConfigurator:
                                           value=st.session_state.get('window_height', 600),
                                           step=50)
         
-        # Window decorations
         window_decorations = st.sidebar.multiselect('Pencere Dekorasyonları',
                                               ['TITLE', 'RESIZE', 'MACOS_FORCE_ENABLE_SHADOW', 'INTEGRATED_BUTTONS'],
                                               default=st.session_state.get('window_decorations', ['TITLE', 'RESIZE']))
         
-        # Window position
         window_position_enabled = st.sidebar.checkbox('Başlangıç Pozisyonu Belirle',
                                                 value=st.session_state.get('window_position') is not None)
         window_position = None
@@ -197,7 +188,6 @@ class WezTermConfigurator:
                 pos_y = st.number_input('Y Pozisyonu', value=0, step=10)
             window_position = [pos_x, pos_y]
         
-        # Window state options
         window_maximized = st.sidebar.checkbox('Pencere Başlangıçta Maksimize',
                                          value=st.session_state.get('window_maximized', False))
         
@@ -207,7 +197,6 @@ class WezTermConfigurator:
         window_always_on_top = st.sidebar.checkbox('Her Zaman Üstte',
                                              value=st.session_state.get('window_always_on_top', False))
         
-        # Window behavior
         window_close_confirmation = st.sidebar.selectbox('Kapatma Onayı',
                                                    ['Never', 'AlwaysPrompt', 'OnlyIfMultipleTabs'],
                                                    index=['Never', 'AlwaysPrompt', 'OnlyIfMultipleTabs'].index(
@@ -217,7 +206,6 @@ class WezTermConfigurator:
         window_hide_tab_bar_if_only_one_tab = st.sidebar.checkbox('Tek Sekme Varsa Sekme Çubuğunu Gizle',
                                                             value=st.session_state.get('window_hide_tab_bar_if_only_one_tab', True))
         
-        # Update session state
         self.update_window_session_state({
             'window_width': window_width,
             'window_height': window_height,
@@ -249,12 +237,10 @@ class WezTermConfigurator:
 
     def render_sidebar(self):
         """Sidebar'ı render et ve konfigürasyon sözlüğünü döndür"""
-        # Her bir kategori için ayarları al
         theme_config = self.render_theme_settings()
         terminal_config = self.render_terminal_options()
         window_config = self.render_window_options()
         
-        # Tüm ayarları birleştir
         config = {}
         config.update(theme_config)
         config.update(terminal_config)
@@ -363,7 +349,6 @@ class WezTermConfigurator:
         )
         
         components.html(settings_html, height=600, scrolling=True)
-
 
 if __name__ == "__main__":
     app = WezTermConfigurator()
