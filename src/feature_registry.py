@@ -164,4 +164,3 @@ class FeatureRegistry:
             widget_type="slider"
         ))
         
-        # Buraya daha fazla varsayılan özellik eklenebilir

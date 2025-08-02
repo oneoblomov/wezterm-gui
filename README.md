@@ -1,5 +1,7 @@
 # WezTerm Yapılandırıcı
 
+[![Test](https://github.com/oneoblomov/wezterm-gui/actions/workflows/test.yml/badge.svg)](https://github.com/oneoblomov/wezterm-gui/actions/workflows/test.yml)
+
 WezTerm terminal emülatörü için görsel bir yapılandırma aracı. Basit ve etkileşimli bir arayüz ile WezTerm ayarlarınızı düzenleyebilir ve sonuçları gerçek zamanlı olarak görebilirsiniz.
 
 ## Canlı Demo
